@@ -1,7 +1,8 @@
-import axios from "axios";
+import axios, {AxiosRequestConfig} from "axios";
 import "./vodafone/sjclCrypto";
 import {IvNotFoundError, SaltNotFoundError} from "./errors";
 import {sjclCCMencrypt, sjclPbkdf2} from "./vodafone/sjclCrypto";
+import {client} from "./browser";
 
 export const SessionData = {
     sessionId: "",
@@ -9,7 +10,7 @@ export const SessionData = {
     salt: "",
     key: "",
 };
-1
+
 export async function login(username: string, password: string) {
     let loginPageHTML = await getLoginPage()
     SessionData.sessionId = getCurrentSessionId(loginPageHTML)
@@ -22,14 +23,13 @@ export async function login(username: string, password: string) {
     let encryptData = sjclCCMencrypt(SessionData.key, jsData, SessionData.iv, authData, 128);
     let loginData = {'EncryptData': encryptData, 'Name': "admin", 'AuthData': authData};
 
-    axios.post('http://vodafone.box/php/ajaxSet_Password.php', loginData)
+    client.post('http://vodafone.box/php/ajaxSet_Password.php', loginData)
         .then(function (response) {
             console.log(response);
         })
         .catch(function (error) {
             console.log(error);
         });
-    // ?_n=85226
 }
 
 function getLoginPage() {
