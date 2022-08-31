@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 
 import {IvNotFoundError, SaltNotFoundError} from "./errors";
 import {
@@ -19,11 +19,12 @@ export const SessionData = {
     salt: "",
     key: "",
     nonce: "",
+    cookie: "",
 };
 
 export async function login(username: string, password: string, retry: number = 0): Promise<boolean> {
     // exceeded retries
-    if (args.maxRetries < retry) {
+    if (args.maxRetries <= retry) {
         return false
     }
 
@@ -39,21 +40,45 @@ export async function login(username: string, password: string, retry: number = 
     let encryptData = sjclCCMencrypt(SessionData.key, jsData, SessionData.iv, authData, DEFAULT_SJCL_TAGLENGTH);
     let loginData = {'EncryptData': encryptData, 'Name': "admin", 'AuthData': authData};
 
-    let response = await client.post('http://vodafone.box/php/ajaxSet_Password.php', loginData, {
-        withCredentials: true,
-        headers: {
-            Cookie: "PHPSESSID=" + SessionData.sessionId + ";"
+    let response
+    try {
+        response = await client.post('http://vodafone.box/php/ajaxSet_Password.php', loginData, {
+            withCredentials: true,
+            headers: {
+                Cookie: "PHPSESSID=" + SessionData.sessionId + ";"
+            }
+        });
+    } catch (err) {
+        console.log("failed to login (try: " + (retry + 1) + "), retrying")
+        if (err instanceof AxiosError) {
+            console.log("code: " + err.code)
+            if (err.response !== undefined) {
+                console.log("status code: " + err.response.status)
+            }
         }
-    });
+        return login(username, password, retry + 1)
+    }
 
     if (response.status != 200) {
-        return login(username, password, retry + 1)
+        console.log("failed to login (try: " + (retry + 1) + ")")
+        return false
     }
 
     let loginResponse = response.data
     if (loginResponse.p_status != "Default") {
         console.log("unexpected status: " + loginResponse.p_status)
         return false
+    }
+
+    if (response.headers["set-cookie"]) {
+        for (let cookies of response.headers["set-cookie"]) {
+            for (let singleCookie of cookies.split(';')) {
+                if (singleCookie.split('=')[0] == "PHPSESSID") {
+                    SessionData.cookie = singleCookie + ";"
+                    console.log("extracted new session cookie: " + SessionData.cookie)
+                }
+            }
+        }
     }
 
     SessionData.nonce = sjclCCMdecrypt(SessionData.key, loginResponse.encryptData, SessionData.iv, "nonce", DEFAULT_SJCL_TAGLENGTH);

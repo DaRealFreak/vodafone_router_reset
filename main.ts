@@ -1,5 +1,6 @@
 import {parse} from 'ts-command-line-args';
 import {diagnostic} from "./diagnostic";
+import {overview} from "./overview";
 
 const {login} = require("./login");
 
@@ -30,17 +31,39 @@ async function reset(): Promise<boolean> {
     )
 
     // check login status
-    let success = await loginStatus
-    if (!success) {
-        return success
+    let loginSuccess = await loginStatus
+    if (!loginSuccess) {
+        return loginSuccess
     }
 
-    let diagnosticStatus = await diagnostic(100, 10, "192.168.0.1").catch((err: any) => console.log(err))
-    if (diagnosticStatus === null || !diagnosticStatus) {
-        return false
-    }
+    let overviewStatus = overview().then(
+        (status: boolean) => {
+            if (!status) {
+                console.log("unable to retrieve the overview")
+                return false
+            }
 
-    return true
+            console.log("successfully retrieved the overview")
+            return true
+        }
+    )
+
+    return await overviewStatus
+
+    let restartStatus = diagnostic(1000, 10, "192.168.0.1").then(
+        (status: boolean) => {
+            if (!status) {
+                console.log("unable to restart the router")
+                return false
+            }
+
+            console.log("successfully restarted the router")
+            return true
+        }
+    )
+
+    // check restart status
+    return await restartStatus
 }
 
 reset().then((success: boolean) => {
