@@ -5,6 +5,7 @@ import {
     DEFAULT_SJCL_ITERATIONS,
     DEFAULT_SJCL_KEYSIZEBITS,
     DEFAULT_SJCL_TAGLENGTH,
+    sjclCCMdecrypt,
     sjclCCMencrypt,
     sjclPbkdf2
 } from "./vodafone/sjclCrypto";
@@ -17,6 +18,7 @@ export const SessionData = {
     iv: "",
     salt: "",
     key: "",
+    nonce: "",
 };
 
 export async function login(username: string, password: string, retry: number = 0): Promise<boolean> {
@@ -53,6 +55,8 @@ export async function login(username: string, password: string, retry: number = 
         console.log("unexpected status: " + loginResponse.p_status)
         return false
     }
+
+    SessionData.nonce = sjclCCMdecrypt(SessionData.key, loginResponse.encryptData, SessionData.iv, "nonce", DEFAULT_SJCL_TAGLENGTH);
 
     return true
 }

@@ -1,4 +1,5 @@
 import {parse} from 'ts-command-line-args';
+import {diagnostic} from "./diagnostic";
 
 const {login} = require("./login");
 
@@ -32,6 +33,11 @@ async function reset(): Promise<boolean> {
     let success = await loginStatus
     if (!success) {
         return success
+    }
+
+    let diagnosticStatus = await diagnostic(100, 10, "192.168.0.1").catch((err: any) => console.log(err))
+    if (diagnosticStatus === null || !diagnosticStatus) {
+        return false
     }
 
     return true
