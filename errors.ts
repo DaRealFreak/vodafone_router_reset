@@ -32,3 +32,10 @@ export class NoPasswordError extends Error {
         this.name = "NoPasswordError"
     }
 }
+
+export class LoginFailedError extends Error {
+    constructor(args: string | undefined) {
+        super(args);
+        this.name = "LoginFailedError"
+    }
+}

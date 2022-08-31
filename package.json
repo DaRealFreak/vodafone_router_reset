@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
     "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json -w",
     "clean": "rm -rf dist build"
   },
   "keywords": [],
@@ -14,8 +15,6 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.27.2",
-    "axios-cookiejar-support": "^4.0.3",
-    "tough-cookie": "^4.1.2",
     "ts-command-line-args": "^2.3.1"
   },
   "devDependencies": {
