@@ -1,2 +1,9 @@
+# no IDEs
 .idea/
+
+# no modules
 node_modules
+
+# ignore build artifacts aside from the crypto functionality from the vodafone user interface
+*.js
+!/vodafone/sjcl.js
