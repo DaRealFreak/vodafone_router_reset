@@ -1,7 +1,6 @@
-import {client} from "./browser";
 import {SessionData} from "./login";
 import {args} from "./main";
-import {AxiosError} from "axios";
+import axios, {AxiosError} from "axios";
 
 export async function overview(retry: number = 0): Promise<boolean> {
     // exceeded retries
@@ -11,10 +10,9 @@ export async function overview(retry: number = 0): Promise<boolean> {
 
     let response
     try {
-        response = await client.get('http://vodafone.box/php/overview_data.php', {
+        response = await axios.get('http://vodafone.box/php/overview_data.php', {
             withCredentials: true,
             headers: {
-                Cookie: SessionData.cookie,
                 csrfNonce: SessionData.nonce
             }
         });

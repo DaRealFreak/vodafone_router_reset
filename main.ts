@@ -1,6 +1,7 @@
 import {parse} from 'ts-command-line-args';
 import {diagnostic} from "./diagnostic";
 import {overview} from "./overview";
+import axios from "axios";
 
 const {login} = require("./login");
 

@@ -1,6 +1,6 @@
-import {client} from "./browser";
 import {SessionData} from "./login";
 import {args} from "./main";
+import axios from "axios";
 
 
 export async function restart(retry: number = 0): Promise<boolean> {
@@ -15,10 +15,9 @@ export async function restart(retry: number = 0): Promise<boolean> {
 
     let response
     try {
-        response = await client.post('http://vodafone.box/php/ajaxSet_status_restart.php', restartData, {
+        response = await axios.post('http://vodafone.box/php/ajaxSet_status_restart.php', restartData, {
             withCredentials: true,
             headers: {
-                Cookie: SessionData.cookie,
                 csrfNonce: SessionData.nonce
             }
         });

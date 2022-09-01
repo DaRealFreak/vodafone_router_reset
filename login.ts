@@ -9,8 +9,8 @@ import {
     sjclCCMencrypt,
     sjclPbkdf2
 } from "./vodafone/sjclCrypto";
-import {client} from "./browser";
 import {args} from "./main";
+import {cookiejar} from "./browser";
 
 export const SessionData = {
     user: "",
@@ -19,7 +19,7 @@ export const SessionData = {
     salt: "",
     key: "",
     nonce: "",
-    cookie: "",
+    phpSessionId: "",
 };
 
 export async function login(username: string, password: string, retry: number = 0): Promise<boolean> {
@@ -42,7 +42,7 @@ export async function login(username: string, password: string, retry: number = 
 
     let response
     try {
-        response = await client.post('http://vodafone.box/php/ajaxSet_Password.php', loginData, {
+        response = await axios.post('http://vodafone.box/php/ajaxSet_Password.php', loginData, {
             withCredentials: true,
             headers: {
                 Cookie: "PHPSESSID=" + SessionData.sessionId + ";"
@@ -70,18 +70,15 @@ export async function login(username: string, password: string, retry: number = 
         return false
     }
 
-    if (response.headers["set-cookie"]) {
-        for (let cookies of response.headers["set-cookie"]) {
-            for (let singleCookie of cookies.split(';')) {
-                if (singleCookie.split('=')[0] == "PHPSESSID") {
-                    SessionData.cookie = singleCookie
-                    console.log("extracted new session cookie: " + SessionData.cookie)
-                }
-            }
-        }
-    }
-
     SessionData.nonce = sjclCCMdecrypt(SessionData.key, loginResponse.encryptData, SessionData.iv, "nonce", DEFAULT_SJCL_TAGLENGTH);
+    cookiejar.getCookies("http://vodafone.box", function (err: any, cookies: any[]) {
+        for (let cookie of cookies) {
+            // login only contains a single cookie, the updated session id
+            SessionData.phpSessionId = cookie.value
+        }
+    });
+
+    console.log(SessionData)
 
     return true
 }

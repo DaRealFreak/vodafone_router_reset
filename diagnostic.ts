@@ -1,7 +1,6 @@
-import {client} from "./browser";
 import {SessionData} from "./login";
 import {args} from "./main";
-import {AxiosError} from "axios";
+import axios, {AxiosError} from "axios";
 
 export async function diagnostic(pingInterval: number, pingNumber: number, pingTarget: string, retry: number = 0): Promise<boolean> {
     // exceeded retries
@@ -23,10 +22,9 @@ export async function diagnostic(pingInterval: number, pingNumber: number, pingT
 
     let response
     try {
-        response = await client.post('http://vodafone.box/php/ajaxSet_status_diagnostic_utility_data.php', diagnosticData, {
+        response = await axios.post('http://vodafone.box/php/ajaxSet_status_diagnostic_utility_data.php', diagnosticData, {
             withCredentials: true,
             headers: {
-                Cookie: SessionData.cookie,
                 csrfNonce: SessionData.nonce
             }
         });
