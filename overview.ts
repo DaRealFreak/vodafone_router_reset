@@ -34,5 +34,9 @@ export async function overview(retry: number = 0): Promise<boolean> {
         return false
     }
 
+    // csrf nonce is apparently not correct yet as seen from the overview
+    // (should contain javascript code as well instead of just empty lines)
+    console.log(response.data)
+
     return true
 }

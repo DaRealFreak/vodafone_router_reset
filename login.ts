@@ -74,7 +74,7 @@ export async function login(username: string, password: string, retry: number = 
         for (let cookies of response.headers["set-cookie"]) {
             for (let singleCookie of cookies.split(';')) {
                 if (singleCookie.split('=')[0] == "PHPSESSID") {
-                    SessionData.cookie = singleCookie + ";"
+                    SessionData.cookie = singleCookie
                     console.log("extracted new session cookie: " + SessionData.cookie)
                 }
             }
