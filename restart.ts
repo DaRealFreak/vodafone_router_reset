@@ -1,8 +1,12 @@
 import {SessionData} from "./login";
 import {args} from "./main";
-import axios from "axios";
+import {page} from "./browser";
 
-
+/**
+ * restarts the router
+ *
+ * @param retry
+ */
 export async function restart(retry: number = 0): Promise<boolean> {
     // exceeded retries
     if (args.maxRetries <= retry) {
@@ -13,22 +17,27 @@ export async function restart(retry: number = 0): Promise<boolean> {
         RestartReset: "Restart"
     }
 
-    let response
-    try {
-        response = await axios.post('http://vodafone.box/php/ajaxSet_status_restart.php', restartData, {
-            withCredentials: true,
+    let output = await page.evaluate((restartData, csrfNonce) => {
+        return fetch('http://vodafone.box/php/ajaxSet_status_restart.php', {
+            method: 'POST',
+            body: JSON.stringify(restartData),
             headers: {
-                csrfNonce: SessionData.nonce
+                csrfNonce: csrfNonce
             }
         });
-    } catch (err) {
-        console.log("failed to restart (try: " + (retry + 1) + "), retrying")
+    }, restartData, SessionData.nonce)
+        .catch(err => err.toString());
+
+    if (typeof output === "string") {
+        console.log("failed to restart (try: " + (retry + 1) + ")")
         return restart(retry + 1)
     }
 
-    if (response.status != 200) {
-        console.log("failed to restart (try: " + (retry + 1) + ")")
-        return false
+    if (output instanceof Response) {
+        if (output.status != 200) {
+            console.log("failed to restart (try: " + (retry + 1) + ")")
+            return restart(retry + 1)
+        }
     }
 
     return true

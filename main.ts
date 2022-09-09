@@ -1,9 +1,7 @@
 import {parse} from 'ts-command-line-args';
-import {diagnostic} from "./diagnostic";
-import {overview} from "./overview";
-import axios from "axios";
-
-const {login} = require("./login");
+import {browser, initialize_browser} from "./browser";
+import {restart} from "./restart";
+import {login} from "./login";
 
 interface VodafoneResetArguments {
     username: string;
@@ -18,7 +16,12 @@ export const args = parse<VodafoneResetArguments>({
 });
 
 
+/**
+ * logs in using the parsed arguments "user" and "password" before trying to restart the router
+ */
 async function reset(): Promise<boolean> {
+    await initialize_browser()
+
     let loginStatus = login(args.username, args.password).then(
         (status: boolean) => {
             if (!status) {
@@ -37,21 +40,7 @@ async function reset(): Promise<boolean> {
         return loginSuccess
     }
 
-    let overviewStatus = overview().then(
-        (status: boolean) => {
-            if (!status) {
-                console.log("unable to retrieve the overview")
-                return false
-            }
-
-            console.log("successfully retrieved the overview")
-            return true
-        }
-    )
-
-    return await overviewStatus
-
-    let restartStatus = diagnostic(1000, 10, "192.168.0.1").then(
+    let restartStatus = restart().then(
         (status: boolean) => {
             if (!status) {
                 console.log("unable to restart the router")
@@ -73,4 +62,6 @@ reset().then((success: boolean) => {
     } else {
         console.log("an error occurred")
     }
+
+    browser.close().then(() => []);
 });

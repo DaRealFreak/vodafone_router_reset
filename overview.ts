@@ -1,40 +1,33 @@
 import {SessionData} from "./login";
 import {args} from "./main";
-import axios, {AxiosError} from "axios";
+import {page} from "./browser";
 
+/**
+ * checks if the overview page can be loaded after being logged in
+ *
+ * @param retry
+ */
 export async function overview(retry: number = 0): Promise<boolean> {
     // exceeded retries
     if (args.maxRetries <= retry) {
         return false
     }
 
-    let response
-    try {
-        response = await axios.get('http://vodafone.box/php/overview_data.php', {
-            withCredentials: true,
+    let output = await page.evaluate((csrfNonce) => {
+        return fetch('http://vodafone.box/php/overview_data.php', {
+            method: 'GET',
             headers: {
-                csrfNonce: SessionData.nonce
+                csrfNonce: csrfNonce
             }
-        });
-    } catch (err) {
-        console.log("failed to retrieve overview (try: " + (retry + 1) + "), retrying")
-        if (err instanceof AxiosError) {
-            console.log("code: " + err.code)
-            if (err.response !== undefined) {
-                console.log("status code: " + err.response.status)
-            }
-        }
+        }).then(res => res.text())
+            .catch(err => err.toString());
+    }, SessionData.nonce);
+
+    // the value is only displayed when we successfully logged in, so we can rely on it being in the response
+    if (output.includes("js_isCmOperational")) {
+        return true
+    } else {
+        console.log("failed to retrieve the overview (try: " + (retry + 1) + "), retrying")
         return overview(retry + 1)
     }
-
-    if (response.status != 200) {
-        console.log("failed to retrieve overview (try: " + (retry + 1) + ")")
-        return false
-    }
-
-    // csrf nonce is apparently not correct yet as seen from the overview
-    // (should contain javascript code as well instead of just empty lines)
-    console.log(response.data)
-
-    return true
 }
