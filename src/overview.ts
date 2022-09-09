@@ -1,5 +1,5 @@
 import { SessionData } from './login'
-import { args } from './main'
+import { args } from './index'
 import { page } from './browser'
 
 /**

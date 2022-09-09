@@ -1,5 +1,5 @@
 import { page } from './browser'
-import { args } from './main'
+import { args } from './index'
 
 export const SessionData = {
     user: '',

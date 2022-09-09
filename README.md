@@ -4,7 +4,7 @@ script for the Vodafone EasyBox to restart the router over their User Interface
 
 ## Usage
 
-`node main.js -u [user] -p [password]`
+`node index.js -u [user] -p [password]`
 
 ## Why?
 
