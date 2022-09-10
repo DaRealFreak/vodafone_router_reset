@@ -29,7 +29,7 @@ export async function restart (retry: number = 0): Promise<boolean> {
         .catch(err => err.toString())
 
     if (typeof output === 'string') {
-        console.log(`failed to restart (try: ${retry + 1})`)
+        console.log(`failed to restart (try: ${retry + 1}), (err: ${output})`)
         return await restart(retry + 1)
     }
 

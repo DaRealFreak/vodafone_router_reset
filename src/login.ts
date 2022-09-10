@@ -22,11 +22,19 @@ export async function login (username: string, password: string, retry: number =
         return false
     }
 
-    await page.goto('http://vodafone.box', { waitUntil: 'domcontentloaded' })
-    await page.evaluate((username, password) => {
-        console.log(login(username, password))
-    }, username, password)
-    await page.goto('http://vodafone.box/?overview', { waitUntil: 'domcontentloaded' })
+    try {
+        await page.goto('http://vodafone.box', { waitUntil: 'domcontentloaded' })
+        await page.evaluate((username, password) => {
+            console.log(login(username, password))
+        }, username, password)
+        // reloading the overview page is needed to get all the session storage items, especially the nonce
+        await page.goto('http://vodafone.box/?overview', { waitUntil: 'domcontentloaded' })
+    } catch (err) {
+        if (err instanceof Error) {
+            console.log(`failed to login (try: ${retry + 1}), retrying (err: ${err.message})`)
+        }
+        return await login(username, password, retry + 1)
+    }
 
     const localStorageData: {} = await page.evaluate(() => {
         /* eslint-disable */

@@ -68,5 +68,12 @@ reset()
             .catch(() => console.log('unable to close browser'))
     })
     .catch(
-        () => console.log('unexpected error occurred')
+        (err) => {
+            if (err instanceof Error) {
+                console.log(`unexpected error occurred ${err.message}`)
+            }
+            browser.close()
+                .then(() => [])
+                .catch(() => console.log('unable to close browser'))
+        }
     )
