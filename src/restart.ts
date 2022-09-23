@@ -9,7 +9,7 @@ import { page } from './browser'
  */
 export async function restart (retry: number = 0): Promise<boolean> {
     // exceeded retries
-    if (args.maxRetries <= retry) {
+    if (args.maxRetries !== -1 && args.maxRetries <= retry) {
         return false
     }
 

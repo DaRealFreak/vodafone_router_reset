@@ -39,7 +39,7 @@ export interface DiagnosticData {
  */
 export async function diagnostic (pingInterval: number, pingNumber: number, pingTarget: string, retry: number = 0): Promise<boolean> {
     // exceeded retries
-    if (args.maxRetries <= retry) {
+    if (args.maxRetries !== -1 && args.maxRetries <= retry) {
         return false
     }
 

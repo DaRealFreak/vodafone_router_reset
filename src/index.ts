@@ -12,7 +12,7 @@ interface VodafoneResetArguments {
 export const args = parse<VodafoneResetArguments>({
     username: { type: String, alias: 'u', description: 'user for the login' },
     password: { type: String, alias: 'p', description: 'password for the login' },
-    maxRetries: { type: Number, alias: 'r', description: 'max amount of retries for each request', defaultValue: 5 }
+    maxRetries: { type: Number, alias: 'r', description: 'max amount of retries for each request', defaultValue: -1 }
 })
 
 /**

@@ -18,7 +18,7 @@ export const SessionData = {
  */
 export async function login (username: string, password: string, retry: number = 0): Promise<boolean> {
     // exceeded retries
-    if (args.maxRetries <= retry) {
+    if (args.maxRetries !== -1 && args.maxRetries <= retry) {
         return false
     }
 
